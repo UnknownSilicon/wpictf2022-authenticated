@@ -56,6 +56,7 @@ int try(struct authenticate* auth) {
         if (verify(auth, 123)) {
             printf("Verified\n");
             if (auth->isAdmin != 0) {
+                // FIXME: Currently, you can just jump right to this segment of code. How to do we protect against this?
                 printf("Flag: \n");
 
                 FILE* fp;
