@@ -12,7 +12,7 @@ void prev() {
 }
 
 void test() {
-    void* val = alloca(128); // w h y  d o e s  t h i s  w o r k
+    void* val = alloca(128);
 }
 
 int main(int argc, char* argv[]) {
