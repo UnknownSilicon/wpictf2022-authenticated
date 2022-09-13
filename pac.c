@@ -1,43 +1,31 @@
-#include "pac.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
-void sign(struct authenticate* auth, int context) {
-    __asm__(
-        "LDR x9, [x0, #0xA]\r\n"
-        "PACGA x10, x9, x1\r\n"
-        "STR x10, [x0, #0x12]\r\n"
-    );
+void is_auth(int* out) {
+    // Do some thing
+    *out = 1;
 }
 
-struct authenticate* initialize(int context) {
-    struct authenticate* auth = malloc(sizeof(struct authenticate));
-    strcpy(auth->name, "default");
-    strcpy(auth->password, "default");
-    auth->isAdmin = 0;
+void print_flag() {
+    int auth = 0;
+    is_auth(&auth);
 
-    sign(auth, context);
+    if (auth) {
+        FILE* fp = fopen("./flag.txt", "r");
 
-    return auth;
+        char buf[255];
+
+        fgets(buf, 50, fp);
+
+        fclose(fp);
+
+        printf("%s", buf);
+    }
 }
 
-int verify(struct authenticate* auth, int context) {
-    __asm__(
-        "LDR x9, [x0, #0xA]\r\n"    // Load `isAdmin` into x9
-        "PACGA x10, x9, x1\r\n"     // Compute the PAC for x9 using `context`
-        "LDR x11, [x0, #0x12]\r\n"  // Load the previous PAC into x11
-        "CMP x10, x11\r\n"          // Compare the two PACs
-        "BEQ end\r\n"               // If they are equal, jump
-        "MOV x9, #0x0\r\n"          // Jump to 0x0
-        "BR x9\r\n"
-        "end:\r\n"                  // All good
-    );
-    return 1;
-}
-
-int try(struct authenticate* auth) {
+int try() {
     char buf[50];
 
     while(1) {
@@ -47,44 +35,7 @@ int try(struct authenticate* auth) {
 
         if (strncmp(buf, "1", 1) == 0) {
 
-        }
-
-
-        
-
-        printf("Enter Name: ");
-        scanf("%50s", buf);
-        strncpy(auth->name, buf, 50);
-
-        printf("\nEnter password: ");
-        scanf("%50s", buf);
-        strncpy(auth->password, buf, 20);
-
-        printf("\n");
-
-        if (strncmp(auth->password, "thisisareallygoodpassword", 25) == 0) {
-            printf("Authenticated\n");
-
-            if (verify(auth, 123)) {
-                printf("Verified\n");
-                if (auth->isAdmin != 0) {
-                    // FIXME: Currently, you can just jump right to this segment of code. How to do we protect against this?
-                    printf("Flag: \n");
-
-                    FILE* fp;
-
-                    fp = fopen("./flag.txt", "rb");
-
-                    fscanf(fp, "%s", buf);
-
-                    printf("%s", buf);
-
-                    return 0;
-                }
-            }
-            printf("Intrusion detected!\n");
-        } else {
-            printf("Failed\n");
+        } else if (strncmp(buf, "2", 1) == 0) {
 
         }
     }
@@ -93,11 +44,9 @@ int try(struct authenticate* auth) {
 
 
 int main(int argc, char* argv[]) {
-    struct authenticate* auth = initialize(123);
-
     printf("Welcome to the Automated Archive Authenticator (AAA) v0.152\n\n");
 
-    return try(auth);
+    return try();
 
     //auth->verify = 0;
 
