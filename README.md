@@ -85,7 +85,7 @@ main_loop:
   3:
    print(buf[64]) // Something to leak the address
   4:
-   test()
+   big_stack()
 
 ```
 
