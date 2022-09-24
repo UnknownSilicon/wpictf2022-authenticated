@@ -104,3 +104,4 @@ General path:
 General ideas:
 - Stack frame manipulation
 - Pointer authentication
+- Uninitialized read

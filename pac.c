@@ -8,16 +8,21 @@ void check_pass(char* pass) {
 }
 
 void is_auth(int* out) {
-    char buf[256];
-    buf[0] = 0;
+    char buf2[4055];
+    buf2[0] = 0;
+    buf2[4054] = 1;
+    buf2[1] = buf2[0];
     // Do some thing
     check_pass("no");
+    printf("%p\n",  (void*)*((long long unsigned int*)((void*)&buf2 - 32))); // Print signed return address of is_auth
     *out = 0;
 }
 
 void print_flag() {
-    char buf2[256];
-    buf2[0] = 0;
+    //char buf2[1024];
+    //buf2[0] = 0;
+    //buf2[1023] = 5;
+    //buf2[1] = buf2[0];
 
     int auth = 0;
     is_auth(&auth);
@@ -37,7 +42,7 @@ void print_flag() {
     }
 }
 
-void test() {
+void read_buf() {
     char auth[10];
 
     gets(auth); // hack
@@ -45,47 +50,60 @@ void test() {
 
     sleep(5);
 
+}
+
+void test() {
+    read_buf();
+    // The stack pointer at the end of this function is what is used to verify
     return;
 }
 
 void big_stack() {
-    char large[2048];
-
-    large[0] = 1; // This is literally just to force the compiler not to optimize the array out
+    char buf[8];
 
     test();
 }
 
-
-// TODO: Alloca will still cause an offset to big_stack
 int looping() {
-    char input[50];
+    char input[64];
 
-    void** stack;
+    char* stack;
 
     while(1) {
-        printf("Select Option: Download More RAM (1), Print Flag (2), Print Info (3), System Test (4), Exit (5): ");
+        printf("Select Option: Download More RAM (1), Print Flag (2), Print Info (3), System Test (4), Reset (5), Exit (6): ");
 
         scanf("%2s", input);
 
         if (strncmp(input, "1", 1) == 0) {
             stack = alloca(64);
+            stack = stack-0x10;
         } else if (strncmp(input, "2", 1) == 0) {
             print_flag();
         } else if (strncmp(input, "3", 1) == 0) {
-            printf("%p\n", *(stack+64));
+            //printf("----\n");
+            //printf("%08llx\n", (long long unsigned int)(stack)); // print the address of stack
+            //printf("%08llx\n", (long long unsigned int)(stack-776)); // print the address of stack+24
+            printf("%08llx\n", *(long long unsigned int *)(0x55007fe8f8)); // print value at 0x55007fe8f8
+            //printf("%08llx\n", *(long long unsigned int *)(stack-776)); // Value at stack+24
+            //printf("%08llx\n", *(long long unsigned int *)(0x55007fe8f8)); // print value at 0x55007fe8f8
+            //printf("----\n");
         } else if (strncmp(input, "4", 1) == 0) {
             big_stack();
         } else if (strncmp(input, "5", 1) == 0) {
-            break;
+            return 0;
+        } else if (strncmp(input, "6", 1) == 0) {
+            return 1;
         }
     }
-    return 0;
+    return 1;
 }
 
 
 int main(int argc, char* argv[]) {
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     printf("Welcome to the Automated Archive Authenticator (AAA) v0.152\n\n");
 
-    return looping();
+    while (looping() == 0);
+    return 0;
 }
